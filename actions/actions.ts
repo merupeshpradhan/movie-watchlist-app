@@ -131,3 +131,24 @@ export async function deleteMovie(movieId: string) {
 
   redirect("/dashboard");
 }
+
+export async function updateMovie(movieId: string, formData: FormData) {
+  "use server";
+
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const watchDate = formData.get("watchDate") as string;
+
+  await prisma.movie.update({
+    where: {
+      id: movieId,
+    },
+    data: {
+      title,
+      description,
+      watchDate: new Date(watchDate),
+    },
+  });
+
+  redirect("/dashboard");
+}

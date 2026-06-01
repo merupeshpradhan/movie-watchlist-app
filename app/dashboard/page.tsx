@@ -85,6 +85,13 @@ export default async function DashboardPage() {
 
             <p>{new Date(movie.watchDate).toLocaleDateString()}</p>
 
+            <a
+              href={`/dashboard/edit/${movie.id}`}
+              className="bg-yellow-500 text-white px-4 py-2 rounded"
+            >
+              Edit Movie
+            </a>
+
             <form action={deleteMovie.bind(null, movie.id)} className="mt-4">
               <button
                 type="submit"
