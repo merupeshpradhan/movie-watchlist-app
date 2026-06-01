@@ -1,0 +1,52 @@
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+
+export async function sendOTP(email: string) {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+
+  await prisma.user.upsert({
+    where: {
+      email,
+    },
+    update: {
+      otp,
+      otpExpiry,
+    },
+    create: {
+      email,
+      otp,
+      otpExpiry,
+    },
+  });
+
+  console.log("Email:", email);
+  console.log("OTP:", otp);
+
+  redirect(`/verify?email=${email}`);
+}
+
+export async function verifyOTP(email: string, otp: string) {
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    return false;
+  }
+
+  if (user.otp !== otp) {
+    return false;
+  }
+
+  if (!user.otpExpiry || user.otpExpiry < new Date()) {
+    return false;
+  }
+
+  return true;
+}
