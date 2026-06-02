@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { addMovie, logout, deleteMovie } from "@/actions/actions";
+import WatchedCheckbox from "@/app/components/WatchedCheckbox";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -78,7 +79,7 @@ export default async function DashboardPage() {
               alt={movie.title}
               className="w-full h-60 object-cover rounded"
             />
-
+            <WatchedCheckbox id={movie.id} watched={movie.watched} />
             <h3 className="text-xl font-bold mt-3">{movie.title}</h3>
 
             <p>{movie.description}</p>

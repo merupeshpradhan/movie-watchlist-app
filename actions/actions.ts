@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { transporter } from "@/lib/mail";
 import cloudinary from "@/lib/cloudinary";
+import { revalidatePath } from "next/cache";
 
 export async function sendOTP(email: string) {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -151,4 +152,21 @@ export async function updateMovie(movieId: string, formData: FormData) {
   });
 
   redirect("/dashboard");
+}
+
+export async function toggleWatched(id: string) {
+  const movie = await prisma.movie.findUnique({
+    where: { id },
+  });
+
+  if (!movie) return;
+
+  await prisma.movie.update({
+    where: { id },
+    data: {
+      watched: !movie.watched,
+    },
+  });
+
+  revalidatePath("/dashboard");
 }
