@@ -1,104 +1,306 @@
+"use client";
+
+import { useRef, useState, useEffect, use } from "react";
+import { useRouter } from "next/navigation";
+import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
+import toast from "react-hot-toast";
 import { verifyOTP } from "@/actions/actions";
 
-export default async function VerifyPage({
+const POSTERS_ROW_1 = [
+  "/Movies/PK__PEEKAY__2014.jpg",
+  "/Movies/Animal.jpg",
+  "/Movies/CM_Vijay.jpg",
+  "/Movies/Tangled.jpg",
+  "/Movies/Karuppu_Grand.jpg",
+];
+
+const POSTERS_ROW_2 = [
+  "/Movies/Moana.jpg",
+  "/Movies/Raavan.jpg",
+  "/Movies/3_Idiots_2009.jpg",
+  "/Movies/Cars.jpg",
+  "/Movies/RRR.jpg",
+];
+
+// Precise seamless wrapping helper
+const wrapX = (min: number, max: number, v: number) => {
+  const rangeSize = max - min;
+  return ((((v - min) % rangeSize) + rangeSize) % rangeSize) + min;
+};
+
+export default function VerifyPage({
   searchParams,
 }: {
-  searchParams: Promise<{
-    email?: string;
-  }>;
+  searchParams: Promise<{ email?: string }>;
 }) {
-  const { email } = await searchParams;
+  const router = useRouter();
+  const resolvedParams = use(searchParams);
+  const email = resolvedParams.email || "";
 
-  async function handleVerify(formData: FormData) {
-    "use server";
+  const [otpValues, setOtpValues] = useState<string[]>(Array(6).fill(""));
+  const inputRefs = useRef<HTMLInputElement[]>([]);
 
-    const otp = formData.get("otp") as string;
-    const result = await verifyOTP(email as string, otp);
+  const trackRef1 = useRef<HTMLDivElement>(null);
+  const x1 = useMotionValue(0);
 
-    console.log("OTP Valid:", result);
+  const trackRef2 = useRef<HTMLDivElement>(null);
+  const x2 = useMotionValue(0);
+
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsReady(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const endlessRow1 = [...POSTERS_ROW_1, ...POSTERS_ROW_1, ...POSTERS_ROW_1];
+  const endlessRow2 = [...POSTERS_ROW_2, ...POSTERS_ROW_2, ...POSTERS_ROW_2];
+
+  const SPEED_COEFF = 0.06;
+
+  // Animation frame loop configured to run nonstop (hover states removed)
+  useAnimationFrame((time, delta) => {
+    if (!isReady) return;
+
+    // Row 1: Continuous Left Flow (- delta)
+    if (trackRef1.current) {
+      const totalWidth = trackRef1.current.scrollWidth;
+      if (totalWidth > 0) {
+        const baseWidth = totalWidth / 3;
+        let currentX = x1.get() - delta * SPEED_COEFF;
+        x1.set(wrapX(-baseWidth, 0, currentX));
+      }
+    }
+
+    // Row 2: Continuous Right Flow (+ delta)
+    if (trackRef2.current) {
+      const totalWidth = trackRef2.current.scrollWidth;
+      if (totalWidth > 0) {
+        const baseWidth = totalWidth / 3;
+        let currentX = x2.get() + delta * SPEED_COEFF;
+        x2.set(wrapX(0, baseWidth, currentX));
+      }
+    }
+  });
+
+  const handleInputChange = (value: string, index: number) => {
+    if (!/^[0-9]?$/.test(value)) return;
+    const newValues = [...otpValues];
+    newValues[index] = value;
+    setOtpValues(newValues);
+
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    if (e.key === "Backspace" && !otpValues[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const combinedOtp = otpValues.join("");
+    if (combinedOtp.length < 6) {
+      toast.error("Please enter a complete 6-digit code");
+      return;
+    }
+
+    const toastId = toast.loading("Authorising login...");
+    try {
+      await verifyOTP(email, combinedOtp);
+      toast.success("Welcome! Loading library...", { id: toastId });
+      router.push("/dashboard");
+    } catch {
+      toast.error("Invalid verification code", { id: toastId });
+    }
   }
 
   return (
-    <div className="min-h-screen bg-[#110e1a] text-[#D3D3FF] antialiased flex flex-col justify-center items-center px-4 sm:px-6 relative overflow-hidden selection:bg-[#9400D3] selection:text-white">
-      
-      {/* BACKGROUND BRAND GLOWS */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#9400D3]/10 rounded-full blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/3 w-60 h-60 bg-[#ED80E9]/5 rounded-full blur-[100px] pointer-events-none" />
+  <main className="flex min-h-screen flex-col md:flex-row bg-[#050508] text-white">
+    {/* LEFT SIDE */}
+    <div className="flex w-full flex-col justify-between px-5 py-8 sm:px-8 md:px-10 lg:w-[45%] lg:px-16 xl:px-24">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-xl shadow-md shadow-violet-500/20">
+          🎬
+        </div>
+        <span className="text-sm font-semibold tracking-wide text-zinc-300">
+          WATCHLIST
+        </span>
+      </div>
 
-      <div className="w-full max-w-md relative z-10">
-        
-        {/* PLATFORM BRANDING */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#D8BFD8]/5 border border-[#D8BFD8]/15 mb-3 shadow-inner">
-            <span className="text-xl">🔑</span>
-          </div>
-          <h1 className="text-3xl font-black tracking-wider uppercase bg-gradient-to-r from-[#D3D3FF] via-[#ED80E9] to-[#9400D3] bg-clip-text text-transparent">
-            CineTrack
-          </h1>
-          <p className="text-[#D3D3FF]/40 text-xs mt-1 uppercase tracking-widest font-semibold">
-            Security Gateway
-          </p>
+      <div className="mx-auto my-auto w-full max-w-md lg:mx-0">
+        <h1 className="text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+          Security Check
+        </h1>
+
+        <p className="mt-3 text-sm text-zinc-400 sm:text-base">
+          We sent a one-time authorization code to your mailbox address:
+        </p>
+
+        <div className="mt-3 inline-block max-w-full break-all rounded-lg border border-white/5 bg-zinc-900 px-3 py-2 text-xs font-mono text-violet-400 sm:text-sm">
+          {email}
         </div>
 
-        {/* VERIFICATION FORM CARD */}
-        <div className="bg-[#D8BFD8]/5 border border-[#D8BFD8]/10 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden before:absolute before:top-0 before:left-0 before:w-full before:h-1 before:bg-gradient-to-r from-[#D3D3FF] via-[#ED80E9] to-[#9400D3]">
-          
-          <div className="mb-6">
-            <h2 className="text-base font-bold uppercase tracking-wide text-[#D3D3FF]">
-              Verify Token //
-            </h2>
-            <p className="text-[#D3D3FF]/50 text-xs mt-1 leading-relaxed">
-              We transmitted a temporary security key code block directly to:{" "}
-              <span className="text-[#ED80E9] font-medium block truncate mt-0.5" title={email}>
-                {email || "your-email@domain.com"}
-              </span>
-            </p>
-          </div>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6 sm:mt-10">
+          <div>
+            <label className="mb-4 block text-xs font-bold uppercase tracking-widest text-zinc-500">
+              Verification Pin
+            </label>
 
-          <form action={handleVerify} className="space-y-4">
-            
-            {/* OTP CODE INPUT FIELD */}
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-[#D3D3FF]/50 mb-1.5">
-                One-Time Authorization Code
-              </label>
-              <div className="relative">
+            <div className="flex justify-center gap-2 sm:gap-3">
+              {otpValues.map((val, idx) => (
                 <input
+                  key={idx}
+                  ref={(el) => {
+                    inputRefs.current[idx] = el!;
+                  }}
                   type="text"
-                  name="otp"
-                  placeholder="Enter 6-digit code"
-                  required
-                  maxLength={6}
-                  autoComplete="one-time-code"
-                  className="w-full bg-[#161324] border border-[#D8BFD8]/20 rounded-md px-3 py-2.5 text-center text-sm font-mono tracking-[0.25em] text-[#D3D3FF] placeholder-[#D3D3FF]/20 focus:outline-none focus:border-[#ED80E9] focus:ring-1 focus:ring-[#ED80E9] transition-all"
+                  maxLength={1}
+                  value={val}
+                  onChange={(e) =>
+                    handleInputChange(e.target.value, idx)
+                  }
+                  onKeyDown={(e) => handleKeyDown(e, idx)}
+                  className="
+                    h-12 w-10
+                    sm:h-14 sm:w-12
+                    md:h-16 md:w-14
+                    rounded-xl
+                    border border-white/10
+                    bg-zinc-900/50
+                    text-center
+                    text-lg sm:text-xl
+                    font-bold
+                    text-white
+                    outline-none
+                    transition-all
+                    focus:border-violet-500
+                    focus:ring-4
+                    focus:ring-violet-500/10
+                  "
                 />
-              </div>
+              ))}
             </div>
+          </div>
 
-            {/* ACTION TRIGGER BUTTON */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="w-full inline-flex items-center justify-center bg-[#9400D3] hover:bg-[#ED80E9] text-white font-black text-xs uppercase tracking-wider h-11 rounded-md transition-all shadow-md shadow-[#9400D3]/20 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
-              >
-                Authorize & Continue
-              </button>
-            </div>
+          <button
+            type="submit"
+            className="
+              group
+              h-12 sm:h-14
+              w-full
+              rounded-xl
+              bg-gradient-to-r
+              from-violet-600
+              via-fuchsia-500
+              to-pink-500
+              font-semibold
+              shadow-lg
+              shadow-violet-600/20
+              transition-all
+              duration-300
+              hover:opacity-95
+              hover:shadow-violet-600/30
+              cursor-pointer
+            "
+          >
+            Verify Identity
+          </button>
+        </form>
 
-          </form>
-        </div>
-
-        {/* BACK TO LOGIN ACCORDION FOOTNOTE */}
-        <div className="text-center mt-6">
+        <div className="mt-8 text-center sm:text-left">
           <a
             href="/"
-            className="text-[10px] font-bold uppercase tracking-widest text-[#D3D3FF]/30 hover:text-[#ED80E9] transition-colors"
+            className="text-sm text-zinc-500 transition hover:text-zinc-300"
           >
-            &larr; Request a New Access Token
+            ← Use a different email address
           </a>
         </div>
+      </div>
 
+      <div className="mt-10 text-xs text-zinc-600">
+        🔒 End-to-end encrypted watch archiving interface structure.
       </div>
     </div>
-  );
+
+    {/* RIGHT SIDE SHOWCASE */}
+    <div className="relative hidden md:flex flex-1 items-center justify-center overflow-hidden border-l border-white/5 bg-[#07070c]">
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#050508] via-transparent to-[#050508]/30 pointer-events-none" />
+
+      <div className="absolute left-1/4 top-1/4 h-[300px] w-[300px] lg:h-[450px] lg:w-[450px] rounded-full bg-violet-600/15 blur-[120px]" />
+
+      <div className="absolute bottom-1/4 right-1/4 h-[280px] w-[280px] lg:h-[400px] lg:w-[400px] rounded-full bg-pink-500/15 blur-[120px]" />
+
+      <div className="absolute rotate-12 scale-110 flex flex-col gap-4 lg:gap-6 opacity-25 mix-blend-screen select-none pointer-events-none">
+        {/* ROW 1 */}
+        <motion.div
+          ref={trackRef1}
+          style={{ x: x1 }}
+          className="flex gap-4 lg:gap-6 shrink-0 will-change-transform"
+        >
+          {endlessRow1.map((src, index) => (
+            <div
+              key={`p1-${index}`}
+              className="
+                h-48 w-32
+                md:h-56 md:w-40
+                lg:h-72 lg:w-52
+                shrink-0
+                rounded-2xl
+                border border-white/10
+                bg-zinc-900
+                shadow-2xl
+              "
+              style={{
+                backgroundImage: `url(${src})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          ))}
+        </motion.div>
+
+        {/* ROW 2 */}
+        <motion.div
+          style={{ x: useMotionValue(0) }}
+          className="flex shrink-0 will-change-transform"
+        >
+          <motion.div
+            ref={trackRef2}
+            style={{ x: x2 }}
+            className="flex gap-4 lg:gap-6 shrink-0"
+            initial={{ x: -2000 }}
+          >
+            {endlessRow2.map((src, index) => (
+              <div
+                key={`p2-${index}`}
+                className="
+                  h-48 w-32
+                  md:h-56 md:w-40
+                  lg:h-72 lg:w-52
+                  shrink-0
+                  rounded-2xl
+                  border border-white/10
+                  bg-zinc-900
+                  shadow-2xl
+                "
+                style={{
+                  backgroundImage: `url(${src})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
+            ))}
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  </main>
+);
 }

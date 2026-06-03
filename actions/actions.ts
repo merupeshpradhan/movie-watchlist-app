@@ -31,7 +31,10 @@ export async function sendOTP(email: string) {
 
   console.log("Email sent to:", email);
 
-  redirect(`/verify?email=${email}`);
+  return {
+    success: true,
+    email,
+  };
 }
 
 export async function verifyOTP(email: string, otp: string) {
@@ -39,12 +42,12 @@ export async function verifyOTP(email: string, otp: string) {
     where: { email },
   });
 
-  if (!user) return false;
+  if (!user) return { success: false };
 
-  if (user.otp !== otp) return false;
+  if (user.otp !== otp) return { success: false };
 
   if (!user.otpExpiry || user.otpExpiry < new Date()) {
-    return false;
+    return { success: false };
   }
 
   const cookieStore = await cookies();
@@ -55,7 +58,7 @@ export async function verifyOTP(email: string, otp: string) {
     path: "/",
   });
 
-  redirect("/dashboard");
+  return { success: true };
 }
 
 export async function logout() {

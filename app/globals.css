@@ -5,11 +5,31 @@
   --foreground: #171717;
 }
 
+/* 1. Add your custom animations and keyframes inside Tailwind v4 @theme directive */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Keyframes Definition */
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes marqueeReverse {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0%); }
+  }
+}
+
+/* 2. Create custom helper utility classes */
+@utility animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+@utility animate-marquee-reverse {
+  animation: marqueeReverse 45s linear infinite;
 }
 
 @media (prefers-color-scheme: dark) {
