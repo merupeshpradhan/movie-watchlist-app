@@ -73,7 +73,7 @@ function MoviesDataStream({ movies }: Props) {
                       {movie.title}
                     </h3>
                     <span className="text-[10px] sm:text-xs font-medium text-[#D3D3FF]/40 shrink-0">
-                      {new Date(movie.watchDate).toLocaleDateString(undefined, {
+                      {new Date(movie.watchDate).toLocaleDateString("en-US", {
                         dateStyle: "medium",
                       })}
                     </span>
@@ -82,7 +82,6 @@ function MoviesDataStream({ movies }: Props) {
 
                 {/* CONTROL ACTION CODES BLOCK */}
                 <div className="flex flex-col xs:flex-row xs:items-center justify-between border-t border-white/5 pt-3 mt-auto gap-3">
-                  
                   {/* CHECKBOX SELECTION TARGET */}
                   <div className="flex items-center gap-2 bg-white/5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-white/5 w-fit select-none">
                     <WatchedCheckbox id={movie.id} watched={movie.watched} />
@@ -103,7 +102,6 @@ function MoviesDataStream({ movies }: Props) {
 
                     <DeleteButton id={movie.id} />
                   </div>
-
                 </div>
               </div>
             </article>
