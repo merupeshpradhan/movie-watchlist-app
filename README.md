@@ -26,14 +26,14 @@ CineTrack allows users to securely log in using Email OTP, manage their personal
 
 ## Landing Page
 
-![Landing Page](<img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/2296774f-a6b5-465d-95b3-de529a2b2272" />
+![Landing Page](https://github.com/user-attachments/assets/2296774f-a6b5-465d-95b3-de529a2b2272
 )
 
 ---
 
 ## OTP Verification Page
 
-![OTP Verification](<img width="1919" height="1019" alt="image" src="https://github.com/user-attachments/assets/195534c6-3b59-4031-9935-a6a9610e7c5a" />
+![OTP Verification](https://github.com/user-attachments/assets/195534c6-3b59-4031-9935-a6a9610e7c5a
 )
 
 ---
@@ -42,14 +42,14 @@ CineTrack allows users to securely log in using Email OTP, manage their personal
 
 > Add your Dashboard screenshot here
 
-![Dashboard](<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/01eea778-d920-4f91-b019-4d9717597d95" />
+![Dashboard](https://github.com/user-attachments/assets/01eea778-d920-4f91-b019-4d9717597d95
 )
 
 ---
 
 ## Movie Details Page
 
-![Add Movie](<img width="1919" height="1019" alt="image" src="https://github.com/user-attachments/assets/70dff946-171a-4cee-881b-a184dc39a97f" />
+![Add Movie]https://github.com/user-attachments/assets/70dff946-171a-4cee-881b-a184dc39a97f
 )
 
 ---
@@ -58,7 +58,7 @@ CineTrack allows users to securely log in using Email OTP, manage their personal
 
 > Add your Edit Movie screenshot here
 
-![Edit Movie](<img width="1919" height="1019" alt="image" src="https://github.com/user-attachments/assets/aed23e30-0c93-4e82-9412-0e037455aae1" />
+![Edit Movie](https://github.com/user-attachments/assets/aed23e30-0c93-4e82-9412-0e037455aae1
 )
 
 ---
