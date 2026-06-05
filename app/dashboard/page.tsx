@@ -15,9 +15,14 @@ export default async function DashboardPage({
   // Get authenticated user
   const user = await getCurrentUser();
 
-  // Redirect unauthenticated users to login page
+  console.log(user);
+
   if (!user) {
-    redirect("/");
+    return (
+      <div className="flex h-screen items-center justify-center text-white">
+        Session expired. Please refresh the page.
+      </div>
+    );
   }
 
   // Resolve search query from URL parameters

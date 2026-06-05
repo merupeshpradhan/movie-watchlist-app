@@ -93,8 +93,13 @@ export default function Home() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
 
-    const toastId = toast.loading("Sending OTP...");
+    if(!email){
+      toast.error("Email is required");
+      return;
+    }
 
+    const toastId = toast.loading("Sending OTP...");
+    
     try {
       // Send OTP and redirect user to verification page
       await sendOTP(email);
@@ -243,7 +248,6 @@ export default function Home() {
                     <input
                       type="email"
                       name="email"
-                      required
                       placeholder="you@example.com"
                       className="h-14 w-full rounded-xl border border-white/10 bg-black/40 px-4 text-white placeholder:text-zinc-500 outline-none transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
                     />
